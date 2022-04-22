@@ -52,6 +52,10 @@ func (m *EBookManager) CountFiles() {
 	fmt.Printf("There are %d files in %s\n", count, m.rootPath)
 }
 
+func (m *EBookManager) Search(data string) {
+	m.searchInItems(data)
+}
+
 func (m *EBookManager) Done() {
 	m.db.Close()
 }
@@ -181,6 +185,14 @@ func (m *EBookManager) countFilesInDirs(path string) int {
 		}
 	}
 	return count
+}
+
+func (m *EBookManager) searchInItems(data string) {
+	for _, item := range m.items {
+		if strings.Contains(strings.ToLower(item.Name), data) {
+			fmt.Printf("%s\n", item.Name)
+		}
+	}
 }
 
 func calculateHash(path string) (hash string, err error) {

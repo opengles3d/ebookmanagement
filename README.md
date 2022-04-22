@@ -11,5 +11,5 @@ Usage of ./ebookmanagement:
   -path string
     	root path (default ".")
   -cmd string
-    	r-remove duplicated, c-count files (default "r")
+    	r-remove duplicated, c-count files, s-search file(default "r")
 
