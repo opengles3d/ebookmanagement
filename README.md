@@ -10,3 +10,6 @@ Usage of ./ebookmanagement:
     	database path (default "./ebookinfo.db")
   -path string
     	root path (default ".")
+  -cmd string
+    	r-remove duplicated, c-count files (default "r")
+

@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"io/fs"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -48,6 +47,11 @@ func (m *EBookManager) RemoveDuplicated() {
 	m.processRoot()
 }
 
+func (m *EBookManager) CountFiles() {
+	count := m.countFilesInDirs(m.rootPath)
+	fmt.Printf("There are %d files in %s\n", count, m.rootPath)
+}
+
 func (m *EBookManager) Done() {
 	m.db.Close()
 }
@@ -66,31 +70,33 @@ func (m *EBookManager) processDirs(path string) {
 		if info.IsDir() {
 			m.processDirs(path + "/" + info.Name())
 		} else {
-			m.processFile(info, path)
+			fullpath := path + "/" + info.Name()
+			m.processFile(fullpath)
 		}
 	}
 }
 
-func (m *EBookManager) processFile(info fs.FileInfo, path string) {
-	fullpath := path + "/" + info.Name()
+func (m *EBookManager) processFile(fullpath string) {
 	hash, err := calculateHash(fullpath)
-	if err == nil {
-		path, ok := m.findIt(hash)
-		if ok {
-			if path != fullpath {
-				removeFile(path, fullpath)
-			}
-		} else {
-			item := EBookItem{
-				Name: fullpath,
-				Hash: hash,
-			}
-			m.addToItems(item)
-			m.addToDB(item)
+	if err != nil {
+		fmt.Printf("calculateHash failed,error:%v\n", err)
+		return
+	}
+
+	path, duplicated := m.findIt(hash)
+	if duplicated {
+		if path != fullpath {
+			removeFile(path, fullpath)
 		}
 	} else {
-		fmt.Printf("calculateHash failed,error:%v\n", err)
+		item := EBookItem{
+			Name: fullpath,
+			Hash: hash,
+		}
+		m.addToItems(item)
+		m.addToDB(item)
 	}
+
 }
 
 func (m *EBookManager) addToItems(item EBookItem) {
@@ -158,6 +164,23 @@ func (m *EBookManager) findIt(hash string) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+func (m *EBookManager) countFilesInDirs(path string) int {
+	fileInfos, err := ioutil.ReadDir(path)
+	if err != nil {
+		fmt.Printf("ReadDir failed,error:%v\n", err)
+		return 0
+	}
+	count := 0
+	for _, info := range fileInfos {
+		if info.IsDir() {
+			count += m.countFilesInDirs(path + "/" + info.Name())
+		} else {
+			count++
+		}
+	}
+	return count
 }
 
 func calculateHash(path string) (hash string, err error) {
