@@ -14,7 +14,7 @@ func main() {
 	var data string
 	flag.StringVar(&rootPath, "path", ".", "root path")
 	flag.StringVar(&dbPath, "db", "./ebookinfo.db", "database path")
-	flag.StringVar(&cmd, "cmd", "r", "r-remove duplicated, c-count files, s-search files")
+	flag.StringVar(&cmd, "cmd", "r", "r-remove duplicated, c-count files, s-search files, n-change name")
 	flag.StringVar(&data, "d", "", "data for cmd if needed")
 	flag.Parse()
 
@@ -25,6 +25,8 @@ func main() {
 		m.CountFiles()
 	case "s":
 		m.Search(data)
+	case "n":
+		m.ChangeName(data)
 	default:
 		m.RemoveDuplicated()
 	}

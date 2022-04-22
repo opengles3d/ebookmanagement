@@ -8,8 +8,10 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"strings"
 
+	"github.com/ebookmanagement/epub"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -54,6 +56,10 @@ func (m *EBookManager) CountFiles() {
 
 func (m *EBookManager) Search(data string) {
 	m.searchInItems(data)
+}
+
+func (m *EBookManager) ChangeName(path string) {
+	m.rename(path)
 }
 
 func (m *EBookManager) Done() {
@@ -193,6 +199,75 @@ func (m *EBookManager) searchInItems(data string) {
 			fmt.Printf("%s\n", item.Name)
 		}
 	}
+}
+
+func (m *EBookManager) rename(fullpath string) {
+	fileInfos, err := ioutil.ReadDir(fullpath)
+	if err != nil {
+		fmt.Printf("ReadDir failed,error:%v\n", err)
+		return
+	}
+
+	for _, info := range fileInfos {
+		if info.IsDir() {
+			m.rename(fullpath + "/" + info.Name())
+		} else {
+			m.renameEPUBFile(fullpath + "/" + info.Name())
+		}
+	}
+
+}
+
+func (m *EBookManager) renameEPUBFile(fullpath string) {
+	dir, filename := path.Split(fullpath)
+	ext := path.Ext(filename)
+	if ext != ".epub" {
+		fmt.Printf("Only support epub file\n")
+		return
+	}
+
+	bk, err := epub.Open(fullpath)
+	if err != nil {
+		fmt.Printf("Open failed,error:%v\n", err)
+		return
+	}
+	bk.Close()
+	if len(bk.Opf.Metadata.Title) == 0 {
+		fmt.Printf("Failed to get title\n")
+		return
+	}
+
+	newname := dir + bk.Opf.Metadata.Title[0] + ".epub"
+
+	if _, err := os.Stat(newname); err == nil {
+		fmt.Printf("%s already exists\n", newname)
+		if len(bk.Opf.Metadata.Date) == 0 {
+			return
+		}
+		newname = dir + bk.Opf.Metadata.Title[0] + bk.Opf.Metadata.Date[0].Data + ".epub"
+	}
+
+	err = os.Rename(fullpath, newname)
+	if err != nil {
+		fmt.Printf("Rename failed,error:%v\n", err)
+		return
+	}
+
+	fmt.Printf("Rename %s to %s successfully\n", fullpath, newname)
+
+	mobi := strings.Replace(fullpath, ".epub", ".mobi", 1)
+	if _, err := os.Stat(mobi); err != nil {
+		return
+	}
+
+	mobi_newname := strings.Replace(newname, ".epub", ".mobi", 1)
+	err = os.Rename(mobi, mobi_newname)
+	if err != nil {
+		fmt.Printf("Rename failed,error:%v\n", err)
+		return
+	}
+	fmt.Printf("Rename %s to %s successfully\n", mobi, mobi_newname)
+
 }
 
 func calculateHash(path string) (hash string, err error) {
