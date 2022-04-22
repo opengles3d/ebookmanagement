@@ -7,7 +7,7 @@ A tool written in go to manage ebooks
 
 Usage of ./ebookmanagement:
   -db string
-    	database path (default "./ebookinfo.db")
+     database path (default "./ebookinfo.db")
   -path string
     	root path (default ".")
   -cmd string
@@ -16,5 +16,4 @@ Usage of ./ebookmanagement:
   -d string
     	parameters of cmd
         s contents to search for
-        
         n file or directory(all included files) to change name
