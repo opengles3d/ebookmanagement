@@ -156,5 +156,5 @@ func main() {
 	}
 	createDBIfNotExist()
 	readDB()
-	listRoot("/media/shaocq/BANQ")
+	listRoot("/media/xxxx/BANQ")
 }
