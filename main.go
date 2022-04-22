@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -148,13 +149,18 @@ func createDBIfNotExist() {
 }
 
 func main() {
+	var rootPath string
+	var dbPath string
+	flag.StringVar(&rootPath, "path", ".", "root path")
+	flag.StringVar(&dbPath, "db", "./ebookinfo.db", "database path")
+	flag.Parse()
 	var err error
-	db, err = sql.Open("sqlite3", "ebookinfo.db")
+	db, err = sql.Open("sqlite3", dbPath)
 	if err != nil {
 		fmt.Printf("Open db failed,error:%v\n", err)
 		return
 	}
 	createDBIfNotExist()
 	readDB()
-	listRoot("/media/xxxx/BANQ")
+	listRoot(rootPath)
 }
