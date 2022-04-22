@@ -16,4 +16,5 @@ Usage of ./ebookmanagement:
   -d string
     	parameters of cmd
         s contents to search for
+        
         n file or directory(all included files) to change name
