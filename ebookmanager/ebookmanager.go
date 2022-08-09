@@ -268,6 +268,54 @@ func (m *EBookManager) renameEPUBFile(fullpath string) {
 	}
 	fmt.Printf("Rename %s to %s successfully\n", mobi, mobi_newname)
 
+	pdf := strings.Replace(fullpath, ".epub", ".pdf", 1)
+	if _, err := os.Stat(pdf); err != nil {
+		return
+	}
+
+	pdf_newname := strings.Replace(newname, ".epub", ".pdf", 1)
+	err = os.Rename(pdf, pdf_newname)
+	if err != nil {
+		fmt.Printf("Rename failed,error:%v\n", err)
+		return
+	}
+	fmt.Printf("Rename %s to %s successfully\n", pdf, pdf_newname)
+
+}
+
+func (m *EBookManager) RemoveSpecifiedString(fullpath string, pattern string) {
+	fileInfos, err := ioutil.ReadDir(fullpath)
+	if err != nil {
+		fmt.Printf("ReadDir failed,error:%v\n", err)
+		return
+	}
+
+	for _, info := range fileInfos {
+		if info.IsDir() {
+			m.RemoveSpecifiedString(fullpath+"/"+info.Name(), pattern)
+		} else {
+			fullname := fullpath + "/" + info.Name()
+			if strings.Contains(fullname, pattern) {
+				m.RemoveSpecifiedStringInFileName(fullname, pattern)
+			}
+		}
+	}
+
+}
+
+func (m *EBookManager) RemoveSpecifiedStringInFileName(fullname string, pattern string) {
+	newname := strings.Replace(fullname, pattern, "", 1)
+	if _, err := os.Stat(newname); err == nil {
+		fmt.Printf("File:%s exist, can not rename successfully\n", newname)
+		return
+	}
+
+	err := os.Rename(fullname, newname)
+	if err != nil {
+		fmt.Printf("Rename failed,error:%v\n", err)
+		return
+	}
+	fmt.Printf("Rename %s to %s successfully\n", fullname, newname)
 }
 
 func calculateHash(path string) (hash string, err error) {
