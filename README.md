@@ -3,7 +3,9 @@
 A tool written in go to manage ebooks
 
 1. Remove duplicated ebooks with same sha256, and keep the record in ebookinfo.db with sqlite3
-
+2. count files in directory
+3. change name by the epub information
+4. remove no use content in file name
 
 Usage of ./ebookmanagement:
   -db string
