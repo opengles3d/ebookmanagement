@@ -11,12 +11,13 @@ Usage of ./ebookmanagement:
   -path string
     	root path (default ".")
   -cmd string
-    	r-remove duplicated, c-count files, s-search files, n-change name (default "r")
+    	r-remove duplicated, c-count files, s-search files, n-change name, p-remove specified string in file name (default "r")
 
   -d string
     	parameters of cmd
         s contents to search for
         n file or directory(all included files) to change name
+        t pattern for cmd is p
 
 
 Ex:./ebookmanagement -cmd p -d /home/shaocq/temp/ttt/ -t '【公众号：书单严选】' 
